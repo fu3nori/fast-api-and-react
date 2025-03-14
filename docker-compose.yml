@@ -3,12 +3,12 @@
 services:
   db:
     image: mysql:8.0
-    container_name: mysql_db
+    container_name: mysql_db2
     environment:
-      MYSQL_ROOT_PASSWORD: "12345678"
+      MYSQL_ROOT_PASSWORD: "abcd"
       MYSQL_USER: "user"
-      MYSQL_PASSWORD: "12345678"
-      MYSQL_DATABASE: "user_db"  # 必要ならデフォルトDBも作成
+      MYSQL_PASSWORD: "abcd"
+      MYSQL_DATABASE: "tracker"  # 必要ならデフォルトDBも作成
     ports:
       - "3306:3306"
     volumes:
@@ -16,14 +16,13 @@ services:
 
   phpmyadmin:
     image: phpmyadmin:latest
-    container_name: pma
+    container_name: pma2
     depends_on:
       - db
     environment:
-      # phpMyAdmin が接続する DB サーバー情報
       PMA_HOST: db
-      # root でログインしたい場合は以下も活用
-      MYSQL_ROOT_PASSWORD: "12345678"
+      # PMA_USER, PMA_PASSWORD を削除
+      MYSQL_ROOT_PASSWORD: "abcd"
     ports:
       - "8080:80"
 
@@ -31,7 +30,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: fastapi_app
+    container_name: fastapi_app2
     depends_on:
       - db
     ports:
@@ -39,9 +38,9 @@ services:
     # DB に接続する場合は環境変数を定義
     environment:
       DB_HOST: db
-      DB_USER: "storch"
-      DB_PASSWORD: "2010abcd"
-      DB_NAME: "storch_db"
+      DB_USER: "user"
+      DB_PASSWORD: "abcd"
+      DB_NAME: "tracker"
 
 
 

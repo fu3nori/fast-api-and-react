@@ -1,5 +1,5 @@
-# phpmyadmin/Dockerfile
+np# phpmyadmin/Dockerfile
 FROM phpmyadmin/phpmyadmin:latest
 
-# ‚à‚µ“Á•Ê‚Èİ’è‚ğ’Ç‹L‚µ‚½‚¢ê‡‚Í‚±‚±‚É’Ç‹L
-# —á) php.ini‚ÌƒRƒs[“™
+# ã‚‚ã—ç‰¹åˆ¥ãªè¨­å®šã‚’è¿½è¨˜ã—ãŸã„å ´åˆã¯ã“ã“ã«è¿½è¨˜
+# ä¾‹) php.iniã®ã‚³ãƒ”ãƒ¼ç­‰

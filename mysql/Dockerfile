@@ -1,15 +1,15 @@
 # mysql/Dockerfile
 FROM mysql:8.0
 
-# MySQL‚É“n‚·‰ŠúÝ’è
-ENV MYSQL_ROOT_PASSWORD=12345678
+# MySQLã«æ¸¡ã™åˆæœŸè¨­å®š
+ENV MYSQL_ROOT_PASSWORD=abcd
 ENV MYSQL_USER=user
-ENV MYSQL_PASSWORD=12345678
+ENV MYSQL_PASSWORD=abcd
 
-# ‚à‚µƒfƒtƒHƒ‹ƒg‚Åì‚è‚½‚¢DB‚ª‚ ‚ê‚Î:
-# ENV MYSQL_DATABASE=my_database
+# ã‚‚ã—ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã§ä½œã‚ŠãŸã„DBãŒã‚ã‚Œã°:
+ENV MYSQL_DATABASE=tracker
 
 EXPOSE 3306
 
-# MySQLƒCƒ[ƒW‚Å‚ÍƒfƒtƒHƒ‹ƒgCMD‚ªmysqld‚È‚Ì‚Å•s—v‚¾‚ª–¾Ž¦
+# MySQLã‚¤ãƒ¡ãƒ¼ã‚¸ã§ã¯ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆCMDãŒmysqldãªã®ã§ä¸è¦ã ãŒæ˜Žç¤º
 CMD ["mysqld"]

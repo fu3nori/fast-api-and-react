@@ -1,0 +1,219 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* 各フォーム項目を横並びにする */
+.form-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1em;
+
+}
+
+
+
+/* form-group-zip で上書き */
+.form-group-zip {
+  /* 全体を block にして、2行に分けられるようにする */
+  display: block;
+  margin-bottom: 1em; /* 下との余白 */
+
+}
+
+/* 1行目：ラベル＋入力欄＋注釈文を横並び */
+.form-group-zip .form-group-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap; /* 折り返しを禁止 */
+  margin-bottom: 0.5em; /* 1行目と2行目の間の余白 */
+}
+
+/* 2行目：郵便番号ボタンを配置するコンテナ */
+.zipcode-button-container {
+  /* ラベルの幅(150px) + その右側の余白(10px) と同じだけ左に余白を作り、
+     他の項目と縦揃えになるようにする */
+  margin-left: 420px;
+  padding-left: 100px;
+}
+
+/* 郵便番号ボタンのスタイル：シアン色、文字は黒 */
+.zipcode-button {
+  background-color: cyan;
+  color: black;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  /* display は inline-block のままでも可 */
+  display: inline-block;
+}
+
+
+/* 左側のラベル：固定幅、右寄せ */
+.form-label {
+  width: 150px;
+  text-align: right;
+  margin-right: 10px;
+}
+
+/* 右側の入力エリア：flexで横並びに */
+.form-input {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* 入力欄、セレクト、ボタンに余白を */
+.form-input input,
+.form-input select,
+.form-input button {
+  margin-right: 10px;
+}
+
+/* 補助文は通常のテキストサイズで表示 */
+.form-note {
+  white-space: nowrap;
+}
+
+/* エラーメッセージの表示 */
+.error-message,
+.submit-error {
+  color: red;
+  margin-bottom: 20px;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+
+
+/* 左側のラベル：固定幅、右寄せ */
+.form-label {
+  width: 150px;
+  text-align: right;
+  margin-right: 10px;
+}
+
+/* 右側の入力エリア：flexで横並びに、折り返しを禁止 */
+.form-input {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+/* 入力欄、セレクト、ボタンに余白を */
+.form-input input,
+.form-input select,
+.form-input button {
+  margin-right: 10px;
+}
+
+/* 郵便番号のボタンは inline-block に指定（必要に応じて inline-flex でも可） */
+.zipcode-button {
+  display: inline-block;
+}
+
+/* 補助文は通常のテキストサイズで、改行させず横に表示 */
+.form-note {
+  white-space: nowrap;
+}
+
+/* エラーメッセージの表示 */
+.error-message,
+.submit-error {
+  color: red;
+  margin-bottom: 20px;
+}
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+
+/* 左側のラベル：固定幅、右寄せ */
+.form-label {
+  width: 150px;
+  text-align: right;
+  margin-right: 10px;
+}
+
+/* 右側の入力エリア：flexで横並び、折り返しを禁止 */
+.form-input {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+/* 入力欄、セレクト、ボタンに余白を */
+.form-input input,
+.form-input select,
+.form-input button {
+  margin-right: 10px;
+}
+
+/* 補助文はテキストが折り返さず横に表示 */
+.form-note {
+  white-space: nowrap;
+}
+
+/* 郵便番号ボタンコンテナ：ラベルの横位置と同じオフセット、1行目との間隔を設定 */
+.zipcode-button-container {
+  margin-left: 160px; /* ラベル幅150px + margin-right 10px */
+  margin-top: 0.5em;
+}
+
+/* 郵便番号ボタンのスタイル：シアン色、文字は黒 */
+.zipcode-button {
+  display: inline-block;
+  background-color: cyan;
+  color: black;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+/* エラーメッセージの表示 */
+.error-message,
+.submit-error {
+  color: red;
+  margin-bottom: 20px;
+}

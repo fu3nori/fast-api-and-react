@@ -2,11 +2,11 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# requirements.txt ���ɃR�s�[���ăC���X�g�[��
+# requirements.txt を先にコピーしてインストール
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# �A�v���̃\�[�X���R�s�[
+# アプリのソースをコピー
 COPY . /app
 
 EXPOSE 8000
