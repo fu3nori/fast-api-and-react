@@ -1,0 +1,49 @@
+
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: "12345678"
+      MYSQL_USER: "user"
+      MYSQL_PASSWORD: "12345678"
+      MYSQL_DATABASE: "user_db"  # 必要ならデフォルトDBも作成
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: pma
+    depends_on:
+      - db
+    environment:
+      # phpMyAdmin が接続する DB サーバー情報
+      PMA_HOST: db
+      # root でログインしたい場合は以下も活用
+      MYSQL_ROOT_PASSWORD: "12345678"
+    ports:
+      - "8080:80"
+
+  fastapi:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fastapi_app
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    # DB に接続する場合は環境変数を定義
+    environment:
+      DB_HOST: db
+      DB_USER: "storch"
+      DB_PASSWORD: "2010abcd"
+      DB_NAME: "storch_db"
+
+
+
+volumes:
+  db-data:
