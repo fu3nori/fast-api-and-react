@@ -1,2 +1,8 @@
 fastapi
 uvicorn
+SQLAlchemy[asyncio]
+asyncmy
+passlib[bcrypt]
+python-dotenv
+cryptography>=3.4.7
+PyJWT

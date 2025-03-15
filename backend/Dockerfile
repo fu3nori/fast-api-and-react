@@ -1,14 +1,18 @@
+# ベースイメージの指定
 FROM python:3.10-slim
 
+# 作業ディレクトリの設定
 WORKDIR /app
 
-# requirements.txt を先にコピーしてインストール
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install "SQLAlchemy[asyncio]" asyncmy
-# アプリのソースをコピー
-COPY . /app
+# 依存パッケージリスト（requirements.txt）をコピー
+COPY requirements.txt .
 
-EXPOSE 8000
+# pip のアップグレードと依存パッケージのインストール
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# アプリケーションコードのコピー
+COPY . .
+
+# サーバーの起動（例: uvicorn を利用）
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--log-level", "debug"]

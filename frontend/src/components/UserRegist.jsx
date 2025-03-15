@@ -1,10 +1,20 @@
 import React, { useState } from 'react';
-import '../App.css'; // 必要に応じてCSSを読み込む
+import { useNavigate } from 'react-router-dom'; // React Routerを使う場合のみ
+import '../App.css'; // フォームレイアウト用のCSSをここに書くか、App.css等に記述
 
+/**
+ * onSuccess: ユーザー登録が成功したときに呼び出されるコールバック関数
+ *            (App.jsx 側で session を更新するなどの処理に使う)
+ */
 const UserRegist = ({ onSuccess }) => {
+    // React Router の useNavigate フックでページ遷移を実現 (必要な場合)
+    const navigate = useNavigate();
+
+    // フォーム入力値を管理するステート
     const [formData, setFormData] = useState({
         mail: '',
         pen_name: '',
+        real_name: '',
         password: '',
         zipcode: '',
         prefectures: '',
@@ -14,7 +24,9 @@ const UserRegist = ({ onSuccess }) => {
         obj: ''
     });
 
+    // バリデーションエラーを保持するステート
     const [errors, setErrors] = useState({});
+    // フォーム送信時のサーバーエラー等を表示するステート
     const [submitError, setSubmitError] = useState('');
 
     // 47都道府県＋「その他」
@@ -28,37 +40,84 @@ const UserRegist = ({ onSuccess }) => {
         "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県", "その他"
     ];
 
-    // 入力欄変更時のハンドラ
+    /**
+     * 入力値が変化したときにステートを更新する
+     */
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prevState) => ({
+        setFormData(prevState => ({
             ...prevState,
             [name]: value
         }));
     };
 
-    // バリデーション
+    /**
+     * フォームの必須項目をチェックし、エラーがあれば errors オブジェクトを返す
+     */
     const validateForm = () => {
         const newErrors = {};
         if (!formData.mail) newErrors.mail = "メールアドレスが未入力です。";
         if (!formData.pen_name) newErrors.pen_name = "ペンネームが未入力です。";
+        if (!formData.real_name) newErrors.real_name = "本名が未入力です。";
         if (!formData.password) newErrors.password = "パスワードが未入力です。";
         if (!formData.zipcode) newErrors.zipcode = "郵便番号が未入力です。";
         if (!formData.prefectures) newErrors.prefectures = "都道府県が未入力です。";
         if (!formData.municipalities) newErrors.municipalities = "市区町村が未入力です。";
         if (!formData.town_name) newErrors.town_name = "町名・区名が未入力です。";
         if (!formData.address) newErrors.address = "番地が未入力です。";
-        // 建物・部屋番号 (obj) は任意
+        // 建物・部屋番号(obj) は任意
         return newErrors;
     };
 
-    // フォーム送信ハンドラ
+    /**
+     * 郵便番号から住所を自動入力するボタンのハンドラ
+     */
+    const handleZipcodeSearch = async () => {
+        const rawZipcode = formData.zipcode || '';
+        // ハイフンを除去
+        const zipcode = rawZipcode.replace(/-/g, '');
+        if (!zipcode) {
+            alert("郵便番号が入力されていません");
+            return;
+        }
+
+        try {
+            const response = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${zipcode}`);
+            const data = await response.json();
+
+            if (data.status !== 200) {
+                alert(data.message || "郵便番号の検索結果がありませんでした");
+                return;
+            }
+            if (!data.results) {
+                alert("該当する住所が見つかりませんでした");
+                return;
+            }
+
+            const result = data.results[0];
+            // APIの結果をフォームに反映
+            setFormData(prev => ({
+                ...prev,
+                prefectures: result.address1,
+                municipalities: result.address2,
+                town_name: result.address3
+            }));
+        } catch (error) {
+            console.error(error);
+            alert("郵便番号検索中にエラーが発生しました");
+        }
+    };
+
+    /**
+     * フォーム送信時のハンドラ
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
+        // バリデーションチェック
         const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
-            // エラーがある場合、画面トップへスクロール
+            // エラーがある場合、ページトップへスクロール
             window.scrollTo(0, 0);
             return;
         } else {
@@ -66,7 +125,7 @@ const UserRegist = ({ onSuccess }) => {
         }
 
         try {
-            // 非同期post
+            // ユーザー登録APIへPOST
             const response = await fetch('/api/user_regist', {
                 method: 'POST',
                 headers: {
@@ -75,39 +134,45 @@ const UserRegist = ({ onSuccess }) => {
                 body: JSON.stringify(formData),
             });
 
-            // 成功時 or エラー時の応答を解析
             if (!response.ok) {
-                // HTTP 200系以外の場合
+                // 200系以外のHTTPステータスの場合
                 const errorData = await response.json();
-                if (errorData.message) {
-                    // メールアドレス重複などのエラー文言
-                    setSubmitError(errorData.message);
-                } else {
-                    setSubmitError("登録中にエラーが発生しました。");
-                }
+                setSubmitError(errorData.detail || "登録中にエラーが発生しました。");
                 return;
             }
 
+            // 登録成功時の処理
             const result = await response.json();
             console.log("サーバー応答:", result);
 
-            // 登録成功時の処理
-            alert("ユーザー登録が送信されました！");
-            // 親コンポーネント(App.jsxなど)に「成功したよ」と通知し、Dashboardを表示
+            // JWTトークンなどを localStorage に保存（キーは "session" などに統一）
+            localStorage.setItem("session", JSON.stringify(result.session));
+
+            alert("ユーザー登録に成功しました！");
+
+            // App.jsx などで定義したコールバックがあれば呼び出す
+            // => これによりApp.jsxのsessionステートが更新され、ダッシュボードへ切り替わる
             if (onSuccess) {
-                onSuccess();
+                onSuccess(result.session);
             }
+
+            // もし React Router のルーティングを使ってページ遷移したい場合
+            // navigate("/dashboard");
+
         } catch (error) {
             console.error(error);
             setSubmitError("登録中にエラーが発生しました。");
         }
     };
 
-    // リセットボタン
+    /**
+     * フォームリセットボタンのハンドラ
+     */
     const handleReset = () => {
         setFormData({
             mail: '',
             pen_name: '',
+            real_name: '',
             password: '',
             zipcode: '',
             prefectures: '',
@@ -120,66 +185,19 @@ const UserRegist = ({ onSuccess }) => {
         setSubmitError('');
     };
 
-    const userLogin =() => {
-        alert("ログイン")
-    }
-
-    // 郵便番号検索ボタンの実装
-    const handleZipcodeSearch = async () => {
-        // 入力された郵便番号（ハイフン除去）
-        const rawZipcode = formData.zipcode || '';
-        const zipcode = rawZipcode.replace(/-/g, ''); // ハイフンが含まれていたら除去
-
-        if (!zipcode) {
-            alert("郵便番号が入力されていません");
-            return;
-        }
-
-        try {
-            // zipcloudのAPIを使って住所を検索
-            const response = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${zipcode}`);
-            const data = await response.json();
-
-            if (data.status !== 200) {
-                // 200以外の場合はエラーや結果なしなど
-                alert(data.message || "郵便番号の検索結果がありませんでした");
-                return;
-            }
-
-            if (!data.results) {
-                // 結果が見つからない場合
-                alert("該当する住所が見つかりませんでした");
-                return;
-            }
-
-            // 結果が見つかった場合は先頭を使用
-            const result = data.results[0];
-            // address1: 都道府県, address2: 市区町村, address3: 町域
-            setFormData((prev) => ({
-                ...prev,
-                prefectures: result.address1,
-                municipalities: result.address2,
-                town_name: result.address3
-            }));
-        } catch (error) {
-            console.error(error);
-            alert("郵便番号検索中にエラーが発生しました");
-        }
-    };
-
     return (
         <div>
-            {/* バリデーションエラーを画面上部に赤文字で表示 */}
+            {/* バリデーションエラーの表示 */}
             {Object.keys(errors).length > 0 && (
-                <div className="error-message" style={{ color: 'red', marginBottom: '20px' }}>
-                    {Object.values(errors).map((errorMsg, index) => (
-                        <div key={index}>{errorMsg}</div>
+                <div className="error-message">
+                    {Object.values(errors).map((msg, idx) => (
+                        <div key={idx}>{msg}</div>
                     ))}
                 </div>
             )}
-            {submitError && <div className="submit-error" style={{ color: 'red' }}>{submitError}</div>}
-            <h2>ユーザーログインはこちらのリンクから</h2>
-                <a onClick={userLogin}>ユーザーログイン</a><br></br>
+            {/* サーバーエラー等の表示 */}
+            {submitError && <div className="submit-error">{submitError}</div>}
+
             <h2>ユーザー新規登録</h2>
 
             <form onSubmit={handleSubmit}>
@@ -219,12 +237,14 @@ const UserRegist = ({ onSuccess }) => {
                     <div className="form-input">
                         <input
                             type="text"
-                            name="pen_name"
-                            value={formData.pen_name}
+                            name="real_name"
+                            value={formData.real_name}
                             onChange={handleInputChange}
                             required
                         />
-                        <span className="form-note">※本名を入力してください(公開されず契約時のみ表示されます)</span>
+                        <span className="form-note">
+              ※本名を入力してください(公開されず契約時のみ表示されます)
+            </span>
                     </div>
                 </div>
 
@@ -245,31 +265,30 @@ const UserRegist = ({ onSuccess }) => {
 
                 {/* 郵便番号 */}
                 <div className="form-group form-group-zip">
-                    {/* 1行目: ラベル + 入力欄 + 注釈文 */}
-                    <div className="form-group-line">
-                        <div className="form-label">郵便番号:</div>
-                        <div className="form-input">
-                            <input
-                                type="text"
-                                name="zipcode"
-                                value={formData.zipcode}
-                                onChange={handleInputChange}
-                                required
-                            />
-                            <span className="form-note">※郵便番号を入力してください(公開されず契約時のみ表示されます)</span>
-                        </div>
+                    <div className="form-label">郵便番号:</div>
+                    <div className="form-input">
+                        <input
+                            type="text"
+                            name="zipcode"
+                            value={formData.zipcode}
+                            onChange={handleInputChange}
+                            required
+                        />
+                        <span className="form-note">
+              ※郵便番号を入力してください(公開されず契約時のみ表示されます)
+            </span>
                     </div>
-                    {/* 2行目: ボタンのみ配置 */}
-                    <div className="zipcode-button-container" style={{ marginLeft: '160px', marginTop: '0.5em' }}>
-                        <button
-                            type="button"
-                            className="zipcode-button"
-                            style={{ backgroundColor: 'cyan', color: 'black', border: 'none', padding: '5px 10px' }}
-                            onClick={handleZipcodeSearch}
-                        >
-                            郵便番号から入力
-                        </button>
-                    </div>
+                </div>
+                {/* 郵便番号検索ボタン */}
+                <div className="form-group" style={{ marginLeft: '160px' }}>
+                    <button
+                        type="button"
+                        className="zipcode-button"
+                        style={{ backgroundColor: 'cyan', color: 'black', border: 'none', padding: '5px 10px' }}
+                        onClick={handleZipcodeSearch}
+                    >
+                        郵便番号から入力
+                    </button>
                 </div>
 
                 {/* 都道府県 */}
@@ -283,8 +302,8 @@ const UserRegist = ({ onSuccess }) => {
                             required
                         >
                             <option value="">選択してください</option>
-                            {prefecturesList.map((pref, index) => (
-                                <option key={index} value={pref}>
+                            {prefecturesList.map((pref, idx) => (
+                                <option key={idx} value={pref}>
                                     {pref}
                                 </option>
                             ))}
@@ -304,7 +323,9 @@ const UserRegist = ({ onSuccess }) => {
                             onChange={handleInputChange}
                             required
                         />
-                        <span className="form-note">※市区町村を入力してください(公開されず契約時のみ表示されます)</span>
+                        <span className="form-note">
+              ※市区町村を入力してください(公開されず契約時のみ表示されます)
+            </span>
                     </div>
                 </div>
 
@@ -319,7 +340,9 @@ const UserRegist = ({ onSuccess }) => {
                             onChange={handleInputChange}
                             required
                         />
-                        <span className="form-note">※町名・区名を入力してください(公開されず契約時のみ表示されます)</span>
+                        <span className="form-note">
+              ※町名・区名を入力してください(公開されず契約時のみ表示されます)
+            </span>
                     </div>
                 </div>
 
@@ -334,7 +357,9 @@ const UserRegist = ({ onSuccess }) => {
                             onChange={handleInputChange}
                             required
                         />
-                        <span className="form-note">※番地を入力してください(公開されず契約時のみ表示されます)</span>
+                        <span className="form-note">
+              ※番地を入力してください(公開されず契約時のみ表示されます)
+            </span>
                     </div>
                 </div>
 
@@ -348,7 +373,9 @@ const UserRegist = ({ onSuccess }) => {
                             value={formData.obj}
                             onChange={handleInputChange}
                         />
-                        <span className="form-note">※建物・部屋番号は任意です(公開されず契約時のみ表示されます)</span>
+                        <span className="form-note">
+              ※建物・部屋番号は任意です(公開されず契約時のみ表示されます)
+            </span>
                     </div>
                 </div>
 

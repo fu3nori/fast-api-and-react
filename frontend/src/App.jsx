@@ -6,25 +6,23 @@ import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
-    // セッション情報。実際はオブジェクトやJWTトークンなどになるが、ここでは簡単のため真偽値またはオブジェクトを使用。
     const [session, setSession] = useState(null)
 
-    // 初回マウント時にlocalStorageからセッション情報を読み込む（あれば）
+    // 初回マウント時に localStorage からセッション情報を読み込む
     useEffect(() => {
         const savedSession = localStorage.getItem("session")
-        if (savedSession) {
+        if (savedSession && savedSession !== "undefined") {
             setSession(JSON.parse(savedSession))
         }
     }, [])
 
-    // 登録成功時にUserRegist.jsxから呼ばれるコールバック
+    // 登録成功時に UserRegist.jsx から呼ばれるコールバック
     const handleRegistSuccess = (sessionData) => {
-        // sessionDataはバックエンド側で発行されたセッション情報等（ここでは仮にオブジェクトを想定）
         setSession(sessionData)
         localStorage.setItem("session", JSON.stringify(sessionData))
     }
 
-    // ログアウト時の処理（Dashboard.jsxから利用）
+    // ログアウト時の処理
     const handleLogout = () => {
         setSession(null)
         localStorage.removeItem("session")
