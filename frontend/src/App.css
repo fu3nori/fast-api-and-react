@@ -35,12 +35,13 @@
 .zipcode-button-container {
   /* ラベルの幅(150px) + その右側の余白(10px) と同じだけ左に余白を作り、
      他の項目と縦揃えになるようにする */
-  margin-left: 420px;
-  padding-left: 100px;
+
 }
 
 /* 郵便番号ボタンのスタイル：シアン色、文字は黒 */
 .zipcode-button {
+  position: relative;
+  right:60px;
   background-color: cyan;
   color: black;
   border: none;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import '../App.css';
+import '../App.css'; // 必要に応じてCSSを読み込む
 
-const UserRegist = () => {
+const UserRegist = ({ onSuccess }) => {
     const [formData, setFormData] = useState({
         mail: '',
         pen_name: '',
@@ -66,20 +66,37 @@ const UserRegist = () => {
         }
 
         try {
-            // 非同期postの実装は後で行います
-            /*
-            const response = await fetch('/api/user_regist.py', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(formData),
+            // 非同期post
+            const response = await fetch('/api/user_regist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
             });
+
+            // 成功時 or エラー時の応答を解析
+            if (!response.ok) {
+                // HTTP 200系以外の場合
+                const errorData = await response.json();
+                if (errorData.message) {
+                    // メールアドレス重複などのエラー文言
+                    setSubmitError(errorData.message);
+                } else {
+                    setSubmitError("登録中にエラーが発生しました。");
+                }
+                return;
+            }
+
             const result = await response.json();
-            // 結果に応じた処理
-            */
-            console.log("送信データ:", formData);
+            console.log("サーバー応答:", result);
+
+            // 登録成功時の処理
             alert("ユーザー登録が送信されました！");
+            // 親コンポーネント(App.jsxなど)に「成功したよ」と通知し、Dashboardを表示
+            if (onSuccess) {
+                onSuccess();
+            }
         } catch (error) {
             console.error(error);
             setSubmitError("登録中にエラーが発生しました。");
@@ -102,6 +119,10 @@ const UserRegist = () => {
         setErrors({});
         setSubmitError('');
     };
+
+    const userLogin =() => {
+        alert("ログイン")
+    }
 
     // 郵便番号検索ボタンの実装
     const handleZipcodeSearch = async () => {
@@ -150,13 +171,17 @@ const UserRegist = () => {
         <div>
             {/* バリデーションエラーを画面上部に赤文字で表示 */}
             {Object.keys(errors).length > 0 && (
-                <div className="error-message">
+                <div className="error-message" style={{ color: 'red', marginBottom: '20px' }}>
                     {Object.values(errors).map((errorMsg, index) => (
                         <div key={index}>{errorMsg}</div>
                     ))}
                 </div>
             )}
-            {submitError && <div className="submit-error">{submitError}</div>}
+            {submitError && <div className="submit-error" style={{ color: 'red' }}>{submitError}</div>}
+            <h2>ユーザーログインはこちらのリンクから</h2>
+                <a onClick={userLogin}>ユーザーログイン</a><br></br>
+            <h2>ユーザー新規登録</h2>
+
             <form onSubmit={handleSubmit}>
                 {/* メールアドレス */}
                 <div className="form-group">
@@ -188,6 +213,21 @@ const UserRegist = () => {
                     </div>
                 </div>
 
+                {/* 本名 */}
+                <div className="form-group">
+                    <div className="form-label">本名:</div>
+                    <div className="form-input">
+                        <input
+                            type="text"
+                            name="pen_name"
+                            value={formData.pen_name}
+                            onChange={handleInputChange}
+                            required
+                        />
+                        <span className="form-note">※本名を入力してください(公開されず契約時のみ表示されます)</span>
+                    </div>
+                </div>
+
                 {/* パスワード */}
                 <div className="form-group">
                     <div className="form-label">パスワード:</div>
@@ -216,14 +256,15 @@ const UserRegist = () => {
                                 onChange={handleInputChange}
                                 required
                             />
-                            <span className="form-note">※郵便番号を入力してください</span>
+                            <span className="form-note">※郵便番号を入力してください(公開されず契約時のみ表示されます)</span>
                         </div>
                     </div>
                     {/* 2行目: ボタンのみ配置 */}
-                    <div className="zipcode-button-container">
+                    <div className="zipcode-button-container" style={{ marginLeft: '160px', marginTop: '0.5em' }}>
                         <button
                             type="button"
                             className="zipcode-button"
+                            style={{ backgroundColor: 'cyan', color: 'black', border: 'none', padding: '5px 10px' }}
                             onClick={handleZipcodeSearch}
                         >
                             郵便番号から入力
@@ -263,7 +304,7 @@ const UserRegist = () => {
                             onChange={handleInputChange}
                             required
                         />
-                        <span className="form-note">※市区町村を入力してください</span>
+                        <span className="form-note">※市区町村を入力してください(公開されず契約時のみ表示されます)</span>
                     </div>
                 </div>
 
@@ -278,7 +319,7 @@ const UserRegist = () => {
                             onChange={handleInputChange}
                             required
                         />
-                        <span className="form-note">※町名・区名を入力してください</span>
+                        <span className="form-note">※町名・区名を入力してください(公開されず契約時のみ表示されます)</span>
                     </div>
                 </div>
 
@@ -293,7 +334,7 @@ const UserRegist = () => {
                             onChange={handleInputChange}
                             required
                         />
-                        <span className="form-note">※番地を入力してください</span>
+                        <span className="form-note">※番地を入力してください(公開されず契約時のみ表示されます)</span>
                     </div>
                 </div>
 
@@ -307,7 +348,7 @@ const UserRegist = () => {
                             value={formData.obj}
                             onChange={handleInputChange}
                         />
-                        <span className="form-note">※建物・部屋番号は任意です</span>
+                        <span className="form-note">※建物・部屋番号は任意です(公開されず契約時のみ表示されます)</span>
                     </div>
                 </div>
 
@@ -315,7 +356,7 @@ const UserRegist = () => {
                 <div className="form-group">
                     <div className="form-label"></div>
                     <div className="form-input">
-                        <button type="submit" className="submit-button">
+                        <button type="submit" className="submit-button" style={{ marginRight: '10px' }}>
                             登録する
                         </button>
                         <button type="button" onClick={handleReset} className="reset-button">
