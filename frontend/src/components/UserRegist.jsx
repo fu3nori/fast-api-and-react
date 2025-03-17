@@ -263,8 +263,9 @@ const UserRegist = ({ onSuccess }) => {
                     </div>
                 </div>
 
+
                 {/* 郵便番号 */}
-                <div className="form-group form-group-zip">
+                <div className="form-group">
                     <div className="form-label">郵便番号:</div>
                     <div className="form-input">
                         <input
@@ -274,17 +275,18 @@ const UserRegist = ({ onSuccess }) => {
                             onChange={handleInputChange}
                             required
                         />
-                        <span className="form-note">
-              ※郵便番号を入力してください(公開されず契約時のみ表示されます)
-            </span>
+                        <span className="form-note">※郵便番号を入力してください(公開されず契約時のみ表示されます)</span>
                     </div>
                 </div>
+
+
                 {/* 郵便番号検索ボタン */}
-                <div className="form-group" style={{ marginLeft: '160px' }}>
+
+                <div className="form-group" style={{marginLeft: '160px'}}>
                     <button
                         type="button"
                         className="zipcode-button"
-                        style={{ backgroundColor: 'cyan', color: 'black', border: 'none', padding: '5px 10px' }}
+                        style={{backgroundColor: 'cyan', color: 'black', border: 'none', padding: '5px 10px'}}
                         onClick={handleZipcodeSearch}
                     >
                         郵便番号から入力
@@ -383,7 +385,7 @@ const UserRegist = ({ onSuccess }) => {
                 <div className="form-group">
                     <div className="form-label"></div>
                     <div className="form-input">
-                        <button type="submit" className="submit-button" style={{ marginRight: '10px' }}>
+                        <button type="submit" className="submit-button" style={{marginRight: '10px'}}>
                             登録する
                         </button>
                         <button type="button" onClick={handleReset} className="reset-button">
